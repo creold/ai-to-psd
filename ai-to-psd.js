@@ -1,49 +1,83 @@
+/*****************************************************************************************
+* Ai-to-Psd.jsx for Adobe Illustrator
+*
+* This script may help to prepare vector layers to export from AI to PSD file. 
+* After usage of the script you should export the file manually via File > Export (.psd)
+*
+* Authors:
+* Serg Osokin, graphic designer 
+* http://sergosokin.ru
+* Radmir Kashaev, software developer
+*
+* NOTICE:
+* Tested with Adobe Illustrator CS6, CC (Win/Mac).
+* This script is provided "as is" without warranty of any kind.
+* Released under the MIT license.
+* http://opensource.org/licenses/mit-license.php
+* 
+* Copyright (C) 2017 Serg Osokin & Radmir Kashaev, All Rights Reserved.
+*
+* Versions:
+*  1.0 Initial version
+*
+******************************************************************************************/
+
 var GRADIENT = "GradientColor";
 var PATTERN = "PatternColor";
 
-if (documents.length > 0) {
- 
-	app.executeMenuCommand('unlockAll');
-	app.executeMenuCommand('deselectall');
+function start() {
+    if (documents.length == 0) return;
 
-	for (var i = 0; i < activeDocument.pathItems.length; i++) {
-		var cp = activeDocument.pathItems[i];
-		if (isForLiveOutline(cp)) {
-			cp.selected = true;
-		}
-	}
-    app.executeMenuCommand('Live Outline Stroke');
-    app.executeMenuCommand('expandStyle');
-    app.executeMenuCommand('deselectall');
+    //unclok all    
+    for (var i = 0; i < activeDocument.pageItems.length; i++){
+        var pi = activeDocument.pageItems[i];
+        pi.locked = false;
+    }
+   
+    //deselect all objects
+    var docRef = activeDocument; 
+    docRef.selection = [];
     
-    var allPaths = [];
-	var allPaths = activeDocument.pathItems;
-	
-	for (var i = 0; i < allPaths.length; ) {
-		var cp = allPaths[i];
-		try {
-			var fillType = cp.fillColor.typename;
-			if (cp.closed && cp.filled  && 
-			  !(cp.stroked || fillType == PATTERN || fillType == GRADIENT)) {
-				cp.selected = true;
-				app.doScript('Psd', 'My');
-				cp.selected = false;
+    var allPaths = activeDocument.pathItems;
+    
+    var layer = activeDocument.activeLayer;
+    
+    for (var i = 0; i < allPaths.length; ) {
+        var cp = allPaths[i];
+        try {
+            var fillType = cp.fillColor.typename;
+            if (cp.closed && cp.filled  && 
+              !(cp.stroked || fillType == PATTERN || fillType == GRADIENT)) {
+                cp.selected = true;
+                app.doScript('Make-CompShape', 'Ai-to-Psd');
+                cp.selected = false;
 // since PathItem become CompoundShape, allPaths will be reduced
-			} else {
+            } else {
+// path didtn' match the condition, so we do group on it
                 i++;
-			}
-		} catch (err) {
-			alert(err);
+                cp = getItemForGroup(cp);
+                if (!checkPType(cp, "GroupItem")) {
+                    var group = layer.groupItems.add();
+                    cp.move(group, ElementPlacement.PLACEATBEGINNING);
+                }				
+            }
+        } catch (err) {
+            //alert(err);
              i++;
-		}
-	}
+        }
+    }
+    alert("Done. Check your document before export to PSD");
 }
 
-//без заливки + есть обводка +  обводка не градиент и не паттерн
-function isForLiveOutline(obj) {
-    try {
-        var strokeType = obj.strokeColor.typename;
-        return (!cp.filled && strokeType != GRADIENT && strokeType != PATTERN);
-    } catch(e) {}
-    return false;    
+function getItemForGroup(pathItem) {
+    if (checkPType(pathItem, "CompoundPathItem")) {
+		return pathItem.parent;
+    }
+	return pathItem;
 }
+
+function checkPType(item, type) {
+	return item != null && item.parent.typename === type;
+}
+
+start();
