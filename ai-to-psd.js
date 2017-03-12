@@ -30,17 +30,12 @@ function start() {
 
     //unclok all    
     for (var i = 0; i < activeDocument.pageItems.length; i++){
-        var pi = activeDocument.pageItems[i];
-        pi.locked = false;
+        activeDocument.pageItems[i].locked = false;
     }
    
-    //deselect all objects
-    var docRef = activeDocument; 
-    docRef.selection = [];
-    
+    deselect();
+        
     var allPaths = activeDocument.pathItems;
-    
-    var layer = activeDocument.activeLayer;
     
     for (var i = 0; i < allPaths.length; ) {
         var cp = allPaths[i];
@@ -50,23 +45,27 @@ function start() {
               !(cp.stroked || fillType == PATTERN || fillType == GRADIENT)) {
                 cp.selected = true;
                 app.doScript('Make-CompShape', 'Ai-to-Psd');
-                cp.selected = false;
-// since PathItem become CompoundShape, allPaths will be reduced
+                // since PathItem become CompoundShape, allPaths will be reduced
             } else {
-// path didtn' match the condition, so we do group on it
+            // path didtn' match the condition, so we do group on it
                 i++;
                 cp = getItemForGroup(cp);
                 if (!checkPType(cp, "GroupItem")) {
-                    var group = layer.groupItems.add();
+                    var group = cp.layer.groupItems.add();
                     cp.move(group, ElementPlacement.PLACEATBEGINNING);
                 }				
             }
         } catch (err) {
             //alert(err);
-             i++;
+            i++;
         }
+        deselect();
     }
     alert("Done. Check your document before export to PSD");
+}
+
+function deselect() {
+    activeDocument.selection = null;
 }
 
 function getItemForGroup(pathItem) {
