@@ -28,11 +28,22 @@ var PATTERN = "PatternColor";
 function start() {
     if (documents.length == 0) return;
 
-    //unclok all    
-    for (var i = 0; i < activeDocument.pageItems.length; i++){
-        activeDocument.pageItems[i].locked = false;
+    var layers = activeDocument.layers;
+    // unlock all visible layers
+    for (var i = 0; i < layers.length; i++) {
+       if (layers[i].visible) {
+          layers[i].locked = false;
+       }
     }
-   
+
+    // unclok all visible objects  
+    for (var i = 0; i < activeDocument.pageItems.length; i++){
+        var pi = activeDocument.pageItems[i];
+        if (pi.layer.visible && pi.visible) {
+            pi.locked = false;
+        }
+    }
+
     deselect();
         
     var allPaths = activeDocument.pathItems;
