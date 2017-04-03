@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 * Ai-to-Psd.jsx for Adobe Illustrator
 *
 * This script may help to prepare vector layers to export from AI to PSD file. 
@@ -19,6 +19,8 @@
 *
 * Versions:
 *  1.0 Initial version
+*  1.1 After start the script unlocks visible layers & objects
+*  1.2 Fixed a performance issue
 *
 ******************************************************************************************/
 
@@ -36,9 +38,11 @@ function start() {
        }
     }
 
+    var allPaths = activeDocument.pathItems;    
+
     // unclok all visible objects  
-    for (var i = 0; i < activeDocument.pageItems.length; i++){
-        var pi = activeDocument.pageItems[i];
+    for (var i = 0; i < allPaths.length; i++){
+        var pi = allPaths[i];
         if (pi.layer.visible && pi.visible) {
             pi.locked = false;
         }
@@ -46,8 +50,6 @@ function start() {
 
     deselect();
         
-    var allPaths = activeDocument.pathItems;
-    
     for (var i = 0; i < allPaths.length; ) {
         var cp = allPaths[i];
         try {
@@ -64,13 +66,13 @@ function start() {
                 if (!checkPType(cp, "GroupItem")) {
                     var group = cp.layer.groupItems.add();
                     cp.move(group, ElementPlacement.PLACEATBEGINNING);
-                }				
+                }               
             }
         } catch (err) {
-            //alert(err);
             i++;
         }
         deselect();
+        app.redraw();
     }
     alert("Done. Check your document before export to PSD");
 }
@@ -81,13 +83,13 @@ function deselect() {
 
 function getItemForGroup(pathItem) {
     if (checkPType(pathItem, "CompoundPathItem")) {
-		return pathItem.parent;
+        return pathItem.parent;
     }
-	return pathItem;
+    return pathItem;
 }
 
 function checkPType(item, type) {
-	return item != null && item.parent.typename === type;
+    return item != null && item.parent.typename === type;
 }
 
 start();
