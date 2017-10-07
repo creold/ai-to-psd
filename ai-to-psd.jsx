@@ -21,6 +21,7 @@
 *  1.0 Initial version
 *  1.1 After start the script unlocks visible layers & objects
 *  1.2 Fixed a performance issue
+*  1.3 Fixed a Overprint issue
 *
 ******************************************************************************************/
 
@@ -57,6 +58,10 @@ function start() {
             if (cp.closed && cp.filled  && 
               !(cp.stroked || fillType == PATTERN || fillType == GRADIENT)) {
                 cp.selected = true;
+                if(cp.fillOverprint || cp.strokeOverprint) {
+                  cp.fillOverprint = false;
+                  cp.strokeOverprint = false;
+                }
                 app.doScript('Make-CompShape', 'Ai-to-Psd');
                 // since PathItem become CompoundShape, allPaths will be reduced
             } else {
@@ -74,7 +79,7 @@ function start() {
         deselect();
         app.redraw();
     }
-    alert("Done. Check your document before export to PSD");
+    alert('Done. Check your document\n' + 'Export PSD: File \u2192 Export \u2192 Export as...\n' + 'Options: Write Layers, turn on all checkbox');
 }
 
 function deselect() {

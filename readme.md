@@ -1,4 +1,5 @@
-# Ai-to-Psd v1.2
+# Ai-to-Psd v1.3
+**New update v1.3: fixed a Overprint Fill issue.** With the option enabled, the object was rasterized when exporting
 
 ![ai-to-psd](images/cover.jpg)
 
@@ -43,6 +44,7 @@ The script has been tested on Illustrator CS6 (Win), Illustrator CC 2017 (OS X E
 
 | Version | Notes |
 | --- | --- |
+| **v1.3** | Fixed a Overprint issue. |
 | **v1.2** | Fixed a performance issue. |
 | **v1.1** | The script unlocks visible layers & objects before and the do the rest. |
 | **v1.0** | Initial Version. | 
