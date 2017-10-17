@@ -1,5 +1,7 @@
-# Ai-to-Psd v1.3
-**New update v1.3: fixed a Overprint Fill issue.** With the option enabled, the object was rasterized when exporting
+# Ai-to-Psd v2.0
+### News
+Version 2.0 of the script doesn't need to load the helper Action file.  
+If you have any of previous versions, you may delete 'Ai-to-Psd' set from `Windows → Actions` right after upgrade.
 
 ![ai-to-psd](images/cover.jpg)
 
@@ -12,11 +14,10 @@ All **solid filled** objects remain vector in the PSD.
 
 1. [Download archive] and unzip
 2. Place `ai-to-psd.jsx` in the Illustrator Scripts folder:
-	- OS X: `/Applications/Adobe Illustrator [version]/Presets.localized/en_GB/Scripts`
-	- Windows (32 bit): `C:\Program Files (x86)\Adobe\Adobe Illustrator [version]\Presets\en_GB\Scripts\`
-	- Windows (64 bit): `C:\Program Files\Adobe\Adobe Illustrator [version] (64 Bit)\Presets\en_GB\Scripts\`
-3. Load `Ai-to-Psd.aia` action file by `Window → Actions → Load Actions… `
-5. Restart Illustrator
+	- OS X: `/Applications/Adobe Illustrator [vers.]/Presets.localized/en_GB/Scripts`
+	- Windows (32 bit): `C:\Program Files (x86)\Adobe\Adobe Illustrator [vers.]\Presets\en_GB\Scripts\`
+	- Windows (64 bit): `C:\Program Files\Adobe\Adobe Illustrator [vers.] (64 Bit)\Presets\en_GB\Scripts\`
+3. Restart Illustrator
 
 [Download archive]: https://github.com/creold/ai-to-psd/archive/master.zip 
 
@@ -37,15 +38,16 @@ If you have a large group of small objects, e.g. hair brush draws, fur or outlin
 
 ## System Requirements
 
-Should work with Adobe Illustrator CS6 and higher.   
+Should work with Adobe Illustrator CS6 and above.   
 The script has been tested on Illustrator CS6 (Win), Illustrator CC 2017 (OS X El Capitan).
 
 ## Release notes 
 
 | Version | Notes |
 | --- | --- |
-| **v1.3** | Fixed a Overprint issue. |
-| **v1.2** | Fixed a performance issue. |
+| **v2.0** | The script doesn't need to load the helper Action file. |
+| **v1.3** | Fixed Overprint issue. |
+| **v1.2** | Improved preformance. |
 | **v1.1** | The script unlocks visible layers & objects before and the do the rest. |
 | **v1.0** | Initial Version. | 
 
