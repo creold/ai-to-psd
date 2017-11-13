@@ -22,6 +22,7 @@
 *  1.2 Fixed a performance issue
 *  1.3 Fixed a Overprint issue
 *  2.0 The script doesn't need to load the helper Action file.
+*  2.1 Fixed unlock and order of objects issue.
 *
 ******************************************************************************************/
 
@@ -79,24 +80,21 @@ function start() {
     createAction(actionStr, 'Ai-to-Psd');
 
     var layers = activeDocument.layers;
-    // unlock all visible layers
+
+    // unlock all visible layers and included objects
     for (var i = 0; i < layers.length; i++) {
-       if (layers[i].visible) {
-          layers[i].locked = false;
-       }
-    }
-
-    var allPaths = activeDocument.pathItems;    
-
-    // unclok all visible objects  
-    for (var i = 0; i < allPaths.length; i++){
-        var pi = allPaths[i];
-        if (pi.layer.visible && pi.visible) {
-            pi.locked = false;
+        if (layers[i].visible) {
+            layers[i].locked = false;
+            var items = layers[i].pathItems; 
+            for (var k = 0; k < items.length; k++) {
+                if (!items[k].hidden) { items[k].locked = false; }
+            }
         }
     }
 
     deselect();
+
+    var allPaths = activeDocument.pathItems;
         
     for (var i = 0; i < allPaths.length; ) {
         var cp = allPaths[i];
@@ -117,7 +115,8 @@ function start() {
                 cp = getItemForGroup(cp);
                 if (!checkPType(cp, "GroupItem")) {
                     var group = cp.layer.groupItems.add();
-                    cp.move(group, ElementPlacement.PLACEATBEGINNING);
+                    group.move(cp, ElementPlacement.PLACEBEFORE);
+                    cp.move(group, ElementPlacement.PLACEATEND);
                 }               
             }
         } catch (err) {

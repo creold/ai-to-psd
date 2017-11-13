@@ -1,5 +1,6 @@
 # Ai-to-Psd v2.0
 ### News
+In version 2.1 fixed unlock and order of objects issue.  
 Version 2.0 of the script doesn't need to load the helper Action file.  
 If you have any of previous versions, you may delete 'Ai-to-Psd' set from `Windows → Actions` right after upgrade.
 
@@ -45,6 +46,7 @@ The script has been tested on Illustrator CS6 (Win), Illustrator CC 2017 (OS X E
 
 | Version | Notes |
 | --- | --- |
+| **v2.1** | Fixed unlock and order of objects issue. |
 | **v2.0** | The script doesn't need to load the helper Action file. |
 | **v1.3** | Fixed Overprint issue. |
 | **v1.2** | Improved preformance. |
