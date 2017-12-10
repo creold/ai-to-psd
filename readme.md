@@ -1,20 +1,24 @@
-# Ai-to-Psd v2.0
-### News
-In version 2.1 fixed unlock and order of objects issue.  
-Version 2.0 of the script doesn't need to load the helper Action file.  
-If you have any of previous versions, you may delete 'Ai-to-Psd' set from `Windows → Actions` right after upgrade.
-
+![header](images/header.png)
 ![ai-to-psd](images/cover.jpg)
+
+# Ai2Psd v2.2
+[![Behance](https://img.shields.io/badge/Behance-%40creold-0055FF.svg)](https://behance.net/creold) [![Dribbble](https://img.shields.io/badge/Dribbble-%40creold-DF3A7A.svg)](https://dribbble.com/creold) [![Instagram](https://img.shields.io/badge/Instagram-%40serg_osokin-8034B2.svg)](https://www.instagram.com/serg_osokin/)
+
+## News
+* Version 2.2 added progress bar and timer.
+* Version 2.1 fixed unlock and order of objects issue.  
+* Version 2.0 of the script doesn't need to load the helper Action file. If you have any of previous versions, you may delete 'Ai-to-Psd' set from `Windows → Actions` right after upgrade.
+
 
 ## Description
 The script may help to prepare vector layers for export from AI to PSD file.  
-All **solid filled** objects remain vector in the PSD.
+All `solid filled` objects remain vector in the PSD.
 
 
 ## Installation 
 
 1. [Download archive] and unzip
-2. Place `ai-to-psd.jsx` in the Illustrator Scripts folder:
+2. Place `Ai2Psd.jsx` in the Illustrator Scripts folder:
 	- OS X: `/Applications/Adobe Illustrator [vers.]/Presets.localized/en_GB/Scripts`
 	- Windows (32 bit): `C:\Program Files (x86)\Adobe\Adobe Illustrator [vers.]\Presets\en_GB\Scripts\`
 	- Windows (64 bit): `C:\Program Files\Adobe\Adobe Illustrator [vers.] (64 Bit)\Presets\en_GB\Scripts\`
@@ -37,15 +41,19 @@ If you have a large group of small objects, e.g. hair brush draws, fur or outlin
 
 *Attention: Meshes, objects with a gradient fill, pattern, various strokes, Open Path can not be left as vectors after the export, but they are automatically grouped to be separate raster layers in the PSD.*
 
+###Progress bar in v2.2
+![ai-to-psd](images/progressbar.jpg)
+
 ## System Requirements
 
 Should work with Adobe Illustrator CS6 and above.   
-The script has been tested on Illustrator CS6 (Win), Illustrator CC 2017 (OS X El Capitan).
+The script has been tested on Illustrator CS6 (Win), Illustrator CC 2017 (Mac OS High Sierra).
 
 ## Release notes 
 
 | Version | Notes |
 | --- | --- |
+| **v2.2** | Added progress bar and timer. |
 | **v2.1** | Fixed unlock and order of objects issue. |
 | **v2.0** | The script doesn't need to load the helper Action file. |
 | **v1.3** | Fixed Overprint issue. |
@@ -53,19 +61,25 @@ The script has been tested on Illustrator CS6 (Win), Illustrator CC 2017 (OS X E
 | **v1.1** | The script unlocks visible layers & objects before and the do the rest. |
 | **v1.0** | Initial Version. | 
 
-### Donate (optional)
-Buy me a glassful of fresh juice to give me work energy: [pay $1 by PayPal] or [Yandex Money] 🙂
+## Contribute
 
-[pay $1 by PayPal]: https://paypal.me/osokin/1usd
+This plugin is in active development.  
+Found a bug? Please [submit a new issues](https://github.com/creold/ai-to-psd/issues) on GitHub.
+
+## Donate (optional)
+If you find this plugin helpful, consider shouting me juice ☕️ via [PayPal] or [Yandex Money] 🙂  
+
+[PayPal]: https://paypal.me/osokin/2usd
 [Yandex Money]: https://money.yandex.ru/to/410011149615582
+<a href="https://paypal.me/osokin/2usd">
+  <img width="160" height="41" src="images/paypal-badge.png" >
+</a>
 
-### Feedback & Help
+### Contact
+Email <hi@sergosokin.ru>  
 
-Found a bug? Please [submit a new issues](https://github.com/creold/ai-to-psd/issues) here on GitHub.
-
-### Authors profiles
+### Co-author
 Radmir Kashaev: [GitHub](https://github.com/rkashaev)  
-Sergey Osokin: [Behance](https://behance.net/creold) 
 
 ### License
 

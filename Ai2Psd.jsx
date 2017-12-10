@@ -1,8 +1,16 @@
 ﻿/*****************************************************************************************
-* Ai-to-Psd.jsx for Adobe Illustrator CS6 and above
+* Ai2Psd.jsx for Adobe Illustrator CS6 and above
 *
 * This script may help to prepare vector layers to export from AI to PSD file. 
 * After usage of the script you should export the file manually via File > Export (.psd)
+*
+* INSTALLATION:
+* 1. Place script in:
+*    Win (32 bit): C:\Program Files (x86)\Adobe\Adobe Illustrator [vers.]\Presets\en_GB\Scripts\
+*    Win (64 bit): C:\Program Files\Adobe\Adobe Illustrator [vers.] (64 Bit)\Presets\en_GB\Scripts\
+*    Mac OS: <hard drive>/Applications/Adobe Illustrator [vers.]/Presets.localized/en_GB/Scripts
+* 2. Restart Illustrator
+* 3. Choose File > Scripts > Ai2Psd
 *
 * NOTICE:
 * Tested with Adobe Illustrator CS6 (Win), CC 2017 (Mac).
@@ -23,10 +31,11 @@
 *  1.3 Fixed a Overprint issue
 *  2.0 The script doesn't need to load the helper Action file.
 *  2.1 Fixed unlock and order of objects issue.
-*
+*  2.2 Added timer & progress bar
 ******************************************************************************************/
 
 #target illustrator
+//app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
 
 var GRADIENT = "GradientColor";
 var PATTERN = "PatternColor";
@@ -68,12 +77,18 @@ var actionStr =
     ''';
 
 function start() {
+    // Progress bar
+    var win = new Window("palette", "Ai2Psd 2.2 | Progress bar", [150, 150, 600, 260]);   
+    win.pnl = win.add("panel", [10, 10, 440, 100], undefined);
+    win.pnl.progBar = win.pnl.add("progressbar", [20, 35, 410, 60], 0, 100);  
+    win.pnl.progBarLabel = win.pnl.add("statictext", [20, 20, 320, 35], "0%");
+
     if (documents.length == 0) {
         alert('There are no documents open.');
         return;
     }
     if ((app.version.substr(0, 2) * 1) < 16) {
-        alert('Sorry, the Ai-to-Psd script only works in versions CS6 (v16) and above.\n' + 'You are using Adobe Illustrator v' + app.version.substr(0, 2));
+        alert('Sorry, the Ai2Psd script only works in versions CS6 (v16) and above.\n' + 'You are using Adobe Illustrator v' + app.version.substr(0, 2));
         return;
     }
 
@@ -82,10 +97,10 @@ function start() {
     var layers = activeDocument.layers;
 
     // unlock all visible layers and included objects
-    for (var i = 0; i < layers.length; i++) {
-        if (layers[i].visible) {
-            layers[i].locked = false;
-            var items = layers[i].pathItems; 
+    for (var j = 0; j < layers.length; j++) {
+        if (layers[j].visible) {
+            layers[j].locked = false;
+            var items = layers[j].pathItems; 
             for (var k = 0; k < items.length; k++) {
                 if (!items[k].hidden) { items[k].locked = false; }
             }
@@ -94,10 +109,20 @@ function start() {
 
     deselect();
 
+    $.hiresTimer; //Start script timer
     var allPaths = activeDocument.pathItems;
+    var numPaths = activeDocument.pathItems.length;
+    var progCount = 1;
+
+    //Show Progress bar
+    win.show();
         
-    for (var i = 0; i < allPaths.length; ) {
+    for (var i = 0; i < allPaths.length;) {
         var cp = allPaths[i];
+        // Change Progress bar
+        win.pnl.progBar.value = progCount*(100/numPaths);
+        win.pnl.progBarLabel.text = win.pnl.progBar.value.toFixed(0) + "%";
+        win.update();
         try {
             var fillType = cp.fillColor.typename;
             if (cp.closed && cp.filled  && 
@@ -124,9 +149,12 @@ function start() {
         }
         deselect();
         app.redraw();
+        progCount++;
     }
     app.unloadAction('Ai-to-Psd', '');
-    alert('Done. Check your document\n' + 'Export PSD: File \u2192 Export \u2192 Export as...\n' + 'Options: Write Layers, turn on all checkbox');
+    var time = $.hiresTimer/1000000; // End script timer
+    win.close();
+    alert('Done. Prepared in ' + time.toFixed(0) + ' seconds.\n' + 'Export PSD: File \u2192 Export \u2192 Export as...\n' + 'Options: Write Layers, turn on all checkbox');
 }
 
 function deselect() {
