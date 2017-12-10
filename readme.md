@@ -12,12 +12,16 @@
 
 ## Description
 The script may help to prepare vector layers for export from AI to PSD file.  
-All `solid filled` objects remain vector in the PSD.
+All `solid filled` objects remain vector in the PSD.   
+
+<a href="https://github.com/creold/ai-to-psd/archive/master.zip ">
+  <img width="160" height="49" src="images/download.png" >
+</a>
 
 
 ## Installation 
 
-1. [Download archive] and unzip
+1. [Download archive] and unzip   
 2. Place `Ai2Psd.jsx` in the Illustrator Scripts folder:
 	- OS X: `/Applications/Adobe Illustrator [vers.]/Presets.localized/en_GB/Scripts`
 	- Windows (32 bit): `C:\Program Files (x86)\Adobe\Adobe Illustrator [vers.]\Presets\en_GB\Scripts\`
@@ -64,16 +68,20 @@ The script has been tested on Illustrator CS6 (Win), Illustrator CC 2017 (Mac OS
 
 ## Contribute
 
-This plugin is in active development.  
+This script is in active development.  
 Found a bug? Please [submit a new issues](https://github.com/creold/ai-to-psd/issues) on GitHub.
 
 ## Donate (optional)
-If you find this plugin helpful, consider shouting me juice ☕️ via [PayPal] or [Yandex Money] 🙂  
+If you find this script helpful, consider shouting me coffee ☕️ via [PayPal] or [Yandex Money] 🙂  
 
 [PayPal]: https://paypal.me/osokin/2usd
 [Yandex Money]: https://money.yandex.ru/to/410011149615582
 <a href="https://paypal.me/osokin/2usd">
-  <img width="160" height="41" src="images/paypal-badge.png" >
+  <img width="160" height="49" src="images/paypal-badge.png" >
+</a>  
+
+<a href="https://money.yandex.ru/to/410011149615582">
+  <img width="160" height="49" src="images/yandex-badge.png" >
 </a>
 
 ### Contact

@@ -4,14 +4,6 @@
 * This script may help to prepare vector layers to export from AI to PSD file. 
 * After usage of the script you should export the file manually via File > Export (.psd)
 *
-* INSTALLATION:
-* 1. Place script in:
-*    Win (32 bit): C:\Program Files (x86)\Adobe\Adobe Illustrator [vers.]\Presets\en_GB\Scripts\
-*    Win (64 bit): C:\Program Files\Adobe\Adobe Illustrator [vers.] (64 Bit)\Presets\en_GB\Scripts\
-*    Mac OS: <hard drive>/Applications/Adobe Illustrator [vers.]/Presets.localized/en_GB/Scripts
-* 2. Restart Illustrator
-* 3. Choose File > Scripts > Ai2Psd
-*
 * NOTICE:
 * Tested with Adobe Illustrator CS6 (Win), CC 2017 (Mac).
 * This script is provided "as is" without warranty of any kind.
@@ -35,7 +27,7 @@
 ******************************************************************************************/
 
 #target illustrator
-//app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
+app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
 
 var GRADIENT = "GradientColor";
 var PATTERN = "PatternColor";
@@ -154,7 +146,7 @@ function start() {
     app.unloadAction('Ai-to-Psd', '');
     var time = $.hiresTimer/1000000; // End script timer
     win.close();
-    alert('Done. Prepared in ' + time.toFixed(0) + ' seconds.\n' + 'Export PSD: File \u2192 Export \u2192 Export as...\n' + 'Options: Write Layers, turn on all checkbox');
+    alert('Done. Prepared in ' + time.toFixed(1) + ' seconds.\n' + 'Export PSD: File \u2192 Export \u2192 Export as...\n' + 'Options: Write Layers, turn on all checkbox');
 }
 
 function deselect() {
