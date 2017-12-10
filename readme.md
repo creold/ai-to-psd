@@ -41,7 +41,8 @@ If you have a large group of small objects, e.g. hair brush draws, fur or outlin
 
 *Attention: Meshes, objects with a gradient fill, pattern, various strokes, Open Path can not be left as vectors after the export, but they are automatically grouped to be separate raster layers in the PSD.*
 
-###Progress bar in v2.2
+###Progress bar in v2.2   
+
 ![ai-to-psd](images/progressbar.jpg)
 
 ## System Requirements
