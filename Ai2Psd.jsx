@@ -1,37 +1,39 @@
-﻿// Ai2Psd.jsx for Adobe Illustrator
-// Description: This script may help to prepare vector paths to export from AI to PSD file. 
-//              After usage of the script you should export the file manually via File > Export (.psd)
-// More info: https://medium.com/@creold/how-to-export-a-illustrator-file-into-a-vector-layered-photoshop-file-2dcc274abf66
-// Requirements: Adobe Illustrator CS6 and above
-// Date: October, 2019
-// Author: Sergey Osokin, email: hi@sergosokin.ru
-// Thanks to Radmir Kashaev, https://github.com/rkashaev for help in creating version 1.0
-//           Alexander Ladygin (http://ladygin.pro) for help in creating version 2.3
-// ============================================================================
-// Versions:
-// 1.0 Initial version
-// 1.1 After start the script unlocks visible layers & objects
-// 1.2 Fixed a performance issue
-// 1.3 Fixed a Overprint issue
-// 2.0 The script doesn't need to load the helper Action file
-// 2.1 Fixed unlock and order of objects issue
-// 2.2 Added timer & progress bar
-// 2.3 Minor issues fixed
-// ============================================================================
-// Donate (optional): If you find this script helpful and want to support me 
-// by shouting me a cup of coffee, you can by via PayPal http://www.paypal.me/osokin/usd
-// ============================================================================
-// NOTICE:
-// Tested with Adobe Illustrator CS6 (Win), CC 2017, 2018 (Mac).
-// This script is provided "as is" without warranty of any kind.
-// Free to use, not for sale.
-// ============================================================================
-// Released under the MIT license.
-// http://opensource.org/licenses/mit-license.php
-// ============================================================================
-// Check other author's scripts: https://github.com/creold
+﻿/*
+  Ai2Psd.jsx for Adobe Illustrator
+  Description: This script may help to prepare vector paths to export from AI to PSD file. 
+               After usage of the script you should export the file manually via File > Export (.psd)
+  More info: https://medium.com/@creold/how-to-export-a-illustrator-file-into-a-vector-layered-photoshop-file-2dcc274abf66
+  Requirements: Adobe Illustrator CS6 and above
+  Date: October, 2019
+  Author: Sergey Osokin, email: hi@sergosokin.ru
+  Thanks to Radmir Kashaev, https://github.com/rkashaev for help in creating version 1.0
+            Alexander Ladygin (http://ladygin.pro) for help in creating version 2.3
+  ============================================================================
+  Versions:
+  1.0 Initial version
+  1.1 After start the script unlocks visible layers & objects
+  1.2 Fixed a performance issue
+  1.3 Fixed a Overprint issue
+  2.0 The script doesn't need to load the helper Action file
+  2.1 Fixed unlock and order of objects issue
+  2.2 Added timer & progress bar
+  2.3 Minor issues fixed
+  ============================================================================
+  Donate (optional): If you find this script helpful, you can buy me a coffee
+                     via PayPal http://www.paypal.me/osokin/usd
+  ============================================================================
+  NOTICE:
+  Tested with Adobe Illustrator CS6 (Win), CC 2017, 2018 (Mac).
+  This script is provided "as is" without warranty of any kind.
+  Free to use, not for sale.
+  ============================================================================
+  Released under the MIT license.
+  http://opensource.org/licenses/mit-license.php
+  ============================================================================
+  Check other author's scripts: https://github.com/creold
+*/
 
-#target illustrator
+//@target illustrator
 app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
 
 // Global variables
@@ -43,7 +45,10 @@ var PATTERN = "PatternColor";
 // Generate Action
 var setName = 'Ai2Psd',
     actionName = 'Make-CompShape',
-    actionPath = Folder.temp;
+    actionPath = Folder.temp + '/' + scriptName + '/';
+
+if(!Folder(actionPath).exists) Folder(actionPath).create();
+
 var actionStr =  [
     '/version 3',
     '/name [' + setName.length,
@@ -167,7 +172,7 @@ function deselect() {
 
 // Load Action to Adobe Illustrator
 function createAction(str, set) {
-    var f = new File('' + actionPath + '/' + set + '.aia');
+    var f = new File('' + actionPath + set + '.aia');
     f.open('w');
     f.write(str);
     f.close();
