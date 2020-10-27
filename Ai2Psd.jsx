@@ -1,10 +1,10 @@
 ﻿/*
   Ai2Psd.jsx for Adobe Illustrator
   Description: This script may help to prepare vector paths to export from AI to PSD file. 
-               After usage of the script you should export the file manually via File > Export (.psd)
-  More info: https://medium.com/@creold/how-to-export-a-illustrator-file-into-a-vector-layered-photoshop-file-2dcc274abf66
-  Requirements: Adobe Illustrator CS6 and above
-  Date: October, 2019
+  More info: EN https://medium.com/@creold/how-to-export-a-illustrator-file-into-a-vector-layered-photoshop-file-2dcc274abf66
+             RU https://sergosokin.ru/blog/export-vector-ai-to-psd/
+  Requirements: Adobe Illustrator CS6 and later
+  Date: February 2017 — September 2020
   Author: Sergey Osokin, email: hi@sergosokin.ru
   Thanks to Radmir Kashaev, https://github.com/rkashaev for help in creating version 1.0
             Alexander Ladygin (http://ladygin.pro) for help in creating version 2.3
@@ -18,14 +18,14 @@
   2.1 Fixed unlock and order of objects issue
   2.2 Added timer & progress bar
   2.3 Minor issues fixed
+  3.0 Algorithm issues fixed. Added:
+      * Saving custom path names;
+      * Russian localization;
   ============================================================================
   Donate (optional): If you find this script helpful, you can buy me a coffee
                      via PayPal http://www.paypal.me/osokin/usd
-  ============================================================================
-  NOTICE:
-  Tested with Adobe Illustrator CS6 (Win), CC 2017, 2018 (Mac).
-  This script is provided "as is" without warranty of any kind.
-  Free to use, not for sale.
+                     via Yandex.Money https://money.yandex.ru/to/410011149615582
+                     via QIWI https://qiwi.com/n/OSOKIN
   ============================================================================
   Released under the MIT license.
   http://opensource.org/licenses/mit-license.php
@@ -34,32 +34,48 @@
 */
 
 //@target illustrator
-app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
+$.localize = true; // Enabling automatic localization
 
 // Global variables
-var scriptName = 'Ai2Psd',
-    scriptVersion = '2.3';
-var GRADIENT = "GradientColor";
-var PATTERN = "PatternColor";
+var SCRIPT_NAME = 'Ai2Psd',
+    SCRIPT_VERSION = '3.0',
+    SCRIPT_AUTHOR = '\u00A9 sergosokin.ru',
+    AI_VER = parseInt(app.version),
+    ACTION_SET = SCRIPT_NAME,
+    ACTION_NAME = 'Make_Compound_Shape',
+    ACTION_PATH = Folder.myDocuments + '/Adobe Scripts/',
+    PERCENTAGE = '%',
+    OVER_ITEMS = 15; // When the number of items >, full-screen mode is enabled;
+
+// EN-RU localized messages
+var LANG_ERR_DOC = { en: 'Error\nOpen a document and try again.',
+                     ru: 'Ошибка\nОткройте документ и запустите скрипт.'},
+    LANG_ERR_VER = { en: 'Error\nSorry, script only works in Illustrator CS6 and later.',
+                     ru: 'Ошибка\nСкрипт работает в Illustrator CS6 и выше.'},
+    LANG_WARN_OBJ = { en: 'Warning\nBitmaps and Graphs can cause errors when exporting them to PSD.',
+                         ru: 'Предупреждение\nРастровые изображения и диаграммы могут вызвать ошибки при экспорте в PSD.'},
+    LANG_CONFIRM_HIDE = { en: 'You can hide them to avoid this.',
+                          ru: 'Вы можете скрыть их, чтобы избежать этого.'},
+    LANG_CONFIRM_AGREE = { en: 'Do you still want to continue?',
+                           ru: 'Хотите продолжить?'},
+    LANG_STATUS_TITLE = { en: 'Preparing objects', ru: 'Подготовка объектов'},
+    LANG_DONE = { en: "What's next\n"
+                      + 'In Export dialog select destination folder and format: PSD.\n\n' 
+                      + 'In Options: Write Layers and turn on all checkboxes.',
+                  ru: "Что дальше\n"
+                      + 'В диалоговом окне экспорта выберите папку и тип файла: PSD.\n\n' 
+                      + 'В параметрах: Сохранить слои и включите все чекбоксы.'};
+
+if (!Folder(ACTION_PATH).exists) { Folder(ACTION_PATH).create(); }
 
 // Generate Action
-var setName = 'Ai2Psd',
-    actionName = 'Make-CompShape',
-    actionPath = Folder.temp + '/' + scriptName + '/';
-
-if(!Folder(actionPath).exists) Folder(actionPath).create();
-
-var actionStr =  [
+var actionString =  [
     '/version 3',
-    '/name [' + setName.length,
-        ascii2Hex(setName),
-    ']',
+    '/name [' + ACTION_SET.length + ' ' + ascii2Hex(ACTION_SET) + ']',
     '/isOpen 1',
     '/actionCount 1',
     '/action-1 {',
-        '/name [' + actionName.length,
-            ascii2Hex(actionName),
-        ']',
+        '/name [' + ACTION_NAME.length + ' ' + ascii2Hex(ACTION_NAME) + ']',
         '/keyIndex 0',
         '/colorIndex 0',
         '/isOpen 1',
@@ -81,163 +97,347 @@ var actionStr =  [
                 '/value 0',
             '}',
         '}',
-    '}'].join('\n');
+    '}'].join('');
 
-function start() {
-    var aiVers = parseFloat(app.version.substr(0, 2)) >= 16;
-    if (!aiVers) {
-        alert('Sorry, the Ai2Psd script only works in versions CS6 (v.16) and above.');
-        return;
+function main() {
+  if (AI_VER < 16) {
+    alert(LANG_ERR_VER);
+    return;
+  }
+  
+  if (app.documents.length == 0) {
+    alert(LANG_ERR_DOC);
+    return;
+  } else {
+    var doc = app.activeDocument,
+        userScreen = doc.views[0].screenMode,
+        itemsArray = [];
+  }
+
+  selection = null;
+
+  // Search for the problematic object types
+  var badItems = searchProblemObj(doc);
+  if (badItems.length) {
+    var isConfirm = confirm(LANG_WARN_OBJ + ' ' + LANG_CONFIRM_HIDE + '\n\n' + LANG_CONFIRM_AGREE);
+    if (!isConfirm) {
+      selection = badItems;
+      return;
     }
+  }
 
-    createAction(actionStr, setName);
-    deselect();
+  unlockAll(doc);
+  limitGroupDepth(doc.layers, 2);
+  app.redraw();
 
-    // Unlock all visible layers and included objects
-    var layers = activeDocument.layers;
-    for (var i = 0; i < layers.length; i++) {
-        if (layers[i].visible) {
-            layers[i].locked = false;
-            var items = layers[i].pageItems;
-            for (var j = 0; j < items.length; j++) {
-                if (!items[j].hidden) {
-                    items[j].locked = false;
-                }
-            }
-        }
+  app.executeMenuCommand('selectall');
+  getItems(selection, itemsArray);
+  selection = null;
+
+  if (itemsArray.length > OVER_ITEMS) { doc.views[0].screenMode = ScreenMode.FULLSCREEN; }
+
+  createAction(actionString, ACTION_SET, ACTION_PATH);
+  
+  // Create progress bar
+  var progMinValue = 0,
+      progMaxValue = 100;
+  var win = new Window('palette', SCRIPT_NAME + ' ' + SCRIPT_AUTHOR);
+      win.opacity = .9;
+  var progPnl = win.add('panel', undefined, LANG_STATUS_TITLE);
+      progPnl.margins = [10, 20, 10, 10];
+      win.alignChildren = ['fill','center'];
+  var progBar = progPnl.add('progressbar', [20, 15, 300, 25], progMinValue, progMaxValue);
+  var progLabel = progPnl.add('statictext', undefined, progMinValue + PERCENTAGE);
+      progLabel.preferredSize.width = 35;
+
+  win.center();
+  win.show();
+
+  // Start processing
+  for (var i = 0; i < itemsArray.length; i++) {
+    var currItem = itemsArray[i];
+    if (currItem.typename === 'CompoundPathItem') {
+      if (currItem.pathItems.length > 0) {
+        currItem = currItem.pathItems[0];
+      } else {
+        // Trick for Compound path created from groups of paths
+        currItem.pathItems.add();
+        currItem = currItem.pathItems[0];
+      }
     }
-
-    limitGroupDepth(3);
-
-    var allPaths = activeDocument.pathItems;
-    var numPaths = activeDocument.pathItems.length;
-    var progressCount = 1;
-    // Create progress bar
-    var win = new Window('palette', 'ProgressBar', [150, 150, 600, 260]);
-    win.pnl = win.add('panel', [10, 10, 440, 100], scriptName + ' Script Progress');
-    win.pnl.progBar = win.pnl.add('progressbar', [20, 35, 410, 60], 0, 100);
-    win.pnl.progBarLabel = win.pnl.add('statictext', [20, 20, 320, 35], '0%');
-    win.show();
-    $.hiresTimer; //Start script timer
+    removeOverprint(currItem);
+    // Save original path name
+    var oldName = transliterate(itemsArray[i].name);
+    try {
+      if (!isSpecialItem(currItem) && isSolidFill(currItem) && !currItem.stroked) {
+        selection = currItem;
         
-    for (var i = 0; i < allPaths.length;) {
-        var cp = allPaths[i];
-        try {
-            var fillType = cp.fillColor.typename;
-            if (cp.closed && cp.filled  && 
-              !(cp.stroked || fillType == PATTERN || fillType == GRADIENT)) {
-                cp.selected = true;
-                if(cp.fillOverprint || cp.strokeOverprint) {
-                  cp.fillOverprint = false;
-                  cp.strokeOverprint = false;
-                }
-                app.doScript(actionName, setName);
-                // since PathItem become CompoundShape, allPaths will be reduced
-            } else {
-            // path didtn' match the condition, so we do group on it
-                i++;
-                cp = getItemForGroup(cp);
-                if (!checkPType(cp, "GroupItem")) {
-                    var group = cp.layer.groupItems.add();
-                    group.move(cp, ElementPlacement.PLACEBEFORE);
-                    cp.move(group, ElementPlacement.PLACEATEND);
-                }               
-            }
-        } catch (err) {
-            i++;
+        // Convert to Compound Shape
+        app.doScript(ACTION_NAME, ACTION_SET);
+        
+        // Restore the name after conversion
+        if (!isEmpty(oldName)) { 
+          // For fix Adobe Illustrator bug, when selection is lost after run action
+          selection = null;
+          selection = itemsArray[i];
+          selection[0].name = oldName;
         }
-        deselect();
         app.redraw();
-
-        win.pnl.progBar.value = parseInt( (progressCount/numPaths)*100 );
-        win.pnl.progBarLabel.text = win.pnl.progBar.value + '%';
-        win.update();
-        progressCount++;
+      } else {
+        // Skip text because it is editable in PSD
+        if (currItem.typename === 'TextFrame') { continue; }
+        if (currItem.parent.typename === 'CompoundPathItem') { 
+          currItem = currItem.parent; 
+        }
+        // Path didn't match the condition, so we do group on it
+        var safeGroup = currItem.layer.groupItems.add();
+            safeGroup.move(currItem, ElementPlacement.PLACEBEFORE);
+            currItem.move(safeGroup, ElementPlacement.PLACEATEND);
+        // Restore the name after grouping
+        if (!isEmpty(oldName)) { 
+          safeGroup.name = oldName; 
+        }
+      }
+    } catch (e) { 
+      // showError(e);
     }
 
-    var time = $.hiresTimer/1000000; // End script timer
-    app.unloadAction(setName, '');
-    win.pnl.progBar.value = 100;
-    win.pnl.progBarLabel.text = win.pnl.progBar.value + '%';
+    // Update Progress bar
+    progBar.value = parseInt((i / itemsArray.length) * 100);
+    progLabel.text = progBar.value + PERCENTAGE;
     win.update();
-    win.close();
-    alert('Done. Prepared in ' + time.toFixed(1) + ' seconds.\n' 
-        + 'Export PSD: File \u2192 Export \u2192 Export as...\n' 
-        + 'Options: Write Layers, turn on all checkbox');
-}
+  }
+  
+  // The final progress bar value
+  progBar.value = progMaxValue;
+  progLabel.text = progBar.value + PERCENTAGE;
+  win.update();
+  win.close();
 
-function deselect() {
-    activeDocument.selection = null;
-}
+  selection = null;
+  app.redraw();
 
-// Load Action to Adobe Illustrator
-function createAction(str, set) {
-    var f = new File('' + actionPath + set + '.aia');
-    f.open('w');
-    f.write(str);
-    f.close();
-    app.loadAction(f);
-    f.remove();
+  app.unloadAction(ACTION_SET, '');
+  doc.views[0].screenMode = userScreen;
+  
+  alert(LANG_DONE);
+  // Open File > Export > Export As... dialog
+  app.executeMenuCommand('export');
 }
 
 function ascii2Hex(hex) {
-    return hex.replace(/./g, function (a) { return a.charCodeAt(0).toString(16) });
+  return hex.replace(/./g, function(a) {
+    return a.charCodeAt(0).toString(16)
+  });
 }
 
-function getItemForGroup(pathItem) {
-    if (checkPType(pathItem, "CompoundPathItem")) {
-        return pathItem.parent;
+// Search bitmaps and graphs
+function searchProblemObj(area) {
+  var badItems = [];
+  if (area.graphItems.length || area.rasterItems.length) {
+    for (var i = 0; i < area.rasterItems.length; i++) {
+      if (!area.rasterItems[i].hidden) {
+        badItems.push(area.rasterItems[i]);
+      }
     }
-    return pathItem;
+    for (var j = 0; j < area.graphItems.length; j++) {
+      if (!area.graphItems[j].hidden) {
+        badItems.push(area.graphItems[j]);
+      }
+    }
+  }
+  return badItems;
 }
 
-function checkPType(item, type) {
-    return item != null && item.parent.typename === type;
+function getItems(area, arr) {
+  for (var i = 0; i < area.length; i++) {
+    var currItem = area[i];
+    try {
+      switch (currItem.typename) {
+        case 'GroupItem':
+          getItems(currItem.pageItems, arr);
+          break;
+        case 'PathItem':
+          if (!currItem.clipping) { arr.push(currItem); }
+          break;
+        case 'CompoundPathItem':
+          if (!currItem.pathItems[0].clipping) { arr.push(currItem); }
+          break;
+        default:
+          if (!currItem.clipping) { arr.push(currItem); }
+          break;
+      }
+    } catch (e) {
+        // showError(e);
+    }
+  }
+}
+
+function getChildAll(arr) {
+  var childsArr = [];
+  for (var i = 0; i < arr.pageItems.length; i++) {
+    childsArr.push(arr.pageItems[i]);
+  }
+  if (arr.layers) {
+    for (var j = 0; j < arr.layers.length; j++) {
+      childsArr.push(arr.layers[j]);
+    }
+  }
+  return childsArr;
+}
+
+// Unlock all layers and included paths
+function unlockAll(doc) {
+  var childArr = getChildAll(doc);
+  for (var i = 0; i < childArr.length; i++) {
+    var currItem = childArr[i],
+        currType = currItem.typename;
+    try {
+      currItem.locked = false;
+      if (currType === 'GroupItem' || currType === 'Layer') {
+        unlockAll(currItem);
+      }
+    } catch (e) {}
+  }
+}
+
+// Ungroup array of target objects
+function ungroupAll(item) {
+  var childArr = getChildAll(item);
+
+  if (childArr.length < 1) {
+    item.remove();
+    return;
+  }
+
+  for (var i = 0; i < childArr.length; i++) {
+    var currItem = childArr[i];
+    try {
+      if (!item.clipped && currItem.parent.typename !== 'Layer') {
+        currItem.move(item, ElementPlacement.PLACEBEFORE);
+      }
+      if (currItem.typename === 'GroupItem' || currItem.typename === 'Layer') {
+        ungroupAll(currItem);
+      }
+    } catch (e) { }
+  }
+}
+
+function createAction(str, set, path) {
+  var f = new File('' + path + '/' + set + '.aia');
+  f.open('w');
+  f.write(str);
+  f.close();
+  app.loadAction(f);
+  f.remove();
 }
 
 function moveGroupItems(items, placement) {
-    var i = items.length,
-        groups = [];
-    if (i > 0) {
-        while (i--) {
-            if (items[i].typename === 'GroupItem') groups.push(items[i]);
-            items[i].moveAfter(placement);
-        }
-        if (!placement.pageItems.length) placement.remove();
+  var i = items.length,
+      groups = [];
+  if (i > 0) {
+    while (i--) {
+      if (items[i].typename === 'GroupItem') groups.push(items[i]);
+      items[i].moveAfter(placement);
     }
-    return groups;
+    if (!placement.pageItems.length) placement.remove();
+  }
+  return groups;
 }
 
 function groupNormalize(groups, max, counter, placement) {
-    var i = groups.length;
-    counter = (counter || 0) + 1;
-    if (i > 0) {
-        while (i--) {
-            if (counter > max) {
-                try {
-                    placement = groups[i];
-                } catch (err) {}
-                try {
-                    moveGroupItems(groups[i].pageItems, placement);
-                } catch (err) {}
-                groupNormalize(groups, max, counter - 1, placement);
-            } else {
-                groupNormalize(groups[i].groupItems, max, counter, placement);
-            }
+  var i = groups.length,
+      counter = (counter || 0) + 1;
+  if (i > 0) {
+    while (i--) {
+      if (counter > max) {
+        try {
+          var placement = groups[i];
+        } catch (e) {}
+        try {
+          if (!groups[i].clipped) { 
+            moveGroupItems(groups[i].pageItems, placement);
+          } else {
+            ungroupAll(groups[i]);
+          }
+        } catch (e) {}
+        groupNormalize(groups, max, counter - 1, placement);
+      } else {
+        try { 
+          groupNormalize(groups[i].groupItems, max, counter, placement);
+        } catch (e) {
+          // showError(e);
         }
+      }
     }
+  }
 }
 
-function limitGroupDepth(depth) {
-    depth = (isNaN(parseInt(depth)) ? 5 : parseInt(depth)) + 1;
-    for (var j = 0; j < activeDocument.layers.length; j++) {
-        groupNormalize(activeDocument.layers[j].groupItems, depth);
+// If the group nesting limit is exceeded, the export will fail
+function limitGroupDepth(_layers, depth) {
+  depth = (isNaN(parseInt(depth)) ? 4 : parseInt(depth)) + 1;
+  for (var i = 0; i < _layers.length; i++) {
+    if (_layers[i].layers.length) {
+      limitGroupDepth(_layers[i], depth);
     }
+    groupNormalize(_layers[i].groupItems, depth);
+  }
+}
+
+// Fix cyrillic name
+function transliterate(name) {
+  var newName = '',
+      a = {};
+  a["Ё"] = "YO"; a["Й"] = "I"; a["Ц"] = "TS"; a["У"] = "U"; a["К"] = "K"; a["Е"] = "E"; a["Н"] = "N"; a["Г"] = "G"; a["Ґ"] = "G"; a["Ш"] = "SH"; a["Щ"] = "SCH"; a["З"] = "Z"; a["Х"] = "H"; a["Ъ"] = "'";
+  a["ё"] = "yo"; a["й"] = "i"; a["ц"] = "ts"; a["у"] = "u"; a["к"] = "k"; a["е"] = "e"; a["н"] = "n"; a["г"] = "g"; a["ґ"] = "g"; a["ш"] = "sh"; a["щ"] = "sch"; a["з"] = "z"; a["х"] = "h"; a["ъ"] = "'";
+  a["Ф"] = "F"; a["Ы"] = "I"; a["В"] = "V"; a["А"] = "a"; a["П"] = "P"; a["Р"] = "R"; a["О"] = "O"; a["Л"] = "L"; a["Д"] = "D"; a["Ж"] = "ZH"; a["Э"] = "E"; a["Є"] = "Je";
+  a["ф"] = "f"; a["ы"] = "i"; a["в"] = "v"; a["а"] = "a"; a["п"] = "p"; a["р"] = "r"; a["о"] = "o"; a["л"] = "l"; a["д"] = "d"; a["ж"] = "zh"; a["э"] = "e"; a["є"] = "je";
+  a["Я"] = "Ya"; a["Ч"] = "CH"; a["С"] = "S"; a["М"] = "M"; a["И"] = "I"; a["Ї"] = "ш"; a["Т"] = "T"; a["Ь"] = "'"; a["Б"] = "B"; a["Ю"] = "YU";
+  a["я"] = "ya"; a["ч"] = "ch"; a["с"] = "s"; a["м"] = "m"; a["и"] = "i"; a["ї"] = "i"; a["т"] = "t"; a["ь"] = "'"; a["б"] = "b"; a["ю"] = "yu";
+  for (var i = 0; i < name.length; i++) {
+    newName += a[name[i]] === undefined ? name[i] : a[name[i]];
+  }
+  return newName;
+}
+
+function isEmpty(str) {
+  return (typeof str === 'undefined' || str.replace(/\s/g, '').length == 0);
+}
+
+function isSolidFill(item) {
+  if (!item.filled) { return false; }
+  if (item.fillColor.typename == 'RGBColor' ||
+      item.fillColor.typename == 'CMYKColor' ||
+      item.fillColor.typename == 'GrayColor' ||
+      item.fillColor.typename == 'SpotColor')
+    { return true; }
+  return false;
+}
+
+function isSpecialItem(item) {
+  var itemType = ['GraphItem', 'GroupItem', 'MeshItem', 'NonNativeItem', 
+                  'PlacedItem', 'PluginItem', 'RasterItem', 'SymbolItem'];
+  for (var i = 0; i < itemType.length; i++) {
+    if (item.typename === itemType[i]) { return true; }
+  }
+  return false;
+}
+
+function removeOverprint(item) {
+  item.fillOverprint = false;
+  item.strokeOverprint = false;
+}
+
+function showError(err) {
+  if (confirm(SCRIPT_NAME + ': an unknown error has occurred.\n' +
+      'Would you like to see more information?', true, 'Unknown Error')) {
+    alert(err + ': on line ' + err.line, 'Script Error', true);
+  }
 }
 
 // Run script
 try {
-    start();
-} catch (err) {
-    // alert(err.message, 'Script Alert', true);
+  main();
+} catch (e) {
+  // showError(e);
 }
