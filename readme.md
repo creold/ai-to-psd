@@ -22,6 +22,13 @@ The Ai2Psd script may help to prepare vector layers for export from AI to PSD fi
 
 *P.S. Some layers in the PSD could get merged randomly...in Adobe CC 2023 there's still no reliable way to control it. We tried!*
 
+> **Warning**   
+> You must have the Layers panel shown and expanded on the screen for the script to work properly.   
+> 
+> The script makes changes to the opened file, so it is better to copy and run it.   
+> 
+> You can't rerun the script on a file that has already been processed. First, use `File → Revert` to revert to the previously saved state.
+
 #### Blog Article
 
 En: [How to export an Illustrator file into a vector layered Photoshop file](https://medium.com/@creold/how-to-export-a-illustrator-file-into-a-vector-layered-photoshop-file-2dcc274abf66)   
@@ -118,10 +125,9 @@ If you have a large group of small objects, e.g. hair brush draws, fur or outlin
 * Michael Helmrich: "This is really powerful! Thank you for sharing"
 
 ## Donate
-You can support my work on new scripts via [Buymeacoffee], [FanTalks], [Tinkoff], [ЮMoney], [Donatty], [DonatePay].   
+You can support my work on new scripts via [Buymeacoffee], [Tinkoff], [ЮMoney], [Donatty], [DonatePay].   
 
 [Buymeacoffee]: https://www.buymeacoffee.com/osokin
-[FanTalks]: https://fantalks.io/r/sergey
 [Tinkoff]: https://www.tinkoff.ru/rm/osokin.sergey127/SN67U9405/
 [ЮMoney]: https://yoomoney.ru/to/410011149615582
 [Donatty]: https://donatty.com/sergosokin
@@ -129,10 +135,6 @@ You can support my work on new scripts via [Buymeacoffee], [FanTalks], [Tinkoff]
 
 <a href="https://www.buymeacoffee.com/osokin">
   <img width="111" height="40" src="https://i.ibb.co/0ssTJQ1/bmc-badge.png">
-</a>
-
-<a href="https://fantalks.io/r/sergey">
-  <img width="111" height="40" src="https://i.ibb.co/vcds3vF/fantalks-badge.png">
 </a>
 
 <a href="https://yoomoney.ru/to/410011149615582">
